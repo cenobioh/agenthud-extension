@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Claude Code hook -> AgentHUD bridge.
+# Reads the hook's JSON payload from stdin and emits a matching AgentHUD status
+# via agent-emit. No-ops silently if AGENTHUD_TERMINAL isn't set (so this is
+# safe to leave enabled even outside an AgentHUD-tracked terminal).
+set -euo pipefail
+
+TERMINAL="${AGENTHUD_TERMINAL:-}"
+if [[ -z "$TERMINAL" ]]; then
+  exit 0
+fi
+
+TITLE="${AGENTHUD_TITLE:-Claude session}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+AGENT_EMIT="$SCRIPT_DIR/agent-emit"
+
+INPUT="$(cat)"
+EVENT="$(echo "$INPUT" | jq -r '.hook_event_name // empty')"
+
+case "$EVENT" in
+  UserPromptSubmit|PreToolUse)
+    "$AGENT_EMIT" --terminal "$TERMINAL" --title "$TITLE" --status WORKING >/dev/null 2>&1
+    ;;
+  Stop)
+    "$AGENT_EMIT" --terminal "$TERMINAL" --title "$TITLE" --status IDLE --snippet "Turn complete" >/dev/null 2>&1
+    ;;
+  Notification)
+    NOTIFICATION_TYPE="$(echo "$INPUT" | jq -r '.notification_type // empty')"
+    if [[ "$NOTIFICATION_TYPE" == "permission_prompt" ]]; then
+      TOOL="$(echo "$INPUT" | jq -r '.tool_name // "a tool"')"
+      "$AGENT_EMIT" --terminal "$TERMINAL" --title "$TITLE" --status WAITING_ON_DECISION --prompt "Approve $TOOL?" >/dev/null 2>&1
+    fi
+    ;;
+esac
+
+exit 0

@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TERMINAL=""
+TITLE=""
+STATUS=""
+PROMPT=""
+SNIPPET=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --terminal) TERMINAL="$2"; shift 2 ;;
+    --title)    TITLE="$2"; shift 2 ;;
+    --status)   STATUS="$2"; shift 2 ;;
+    --prompt)   PROMPT="$2"; shift 2 ;;
+    --snippet)  SNIPPET="$2"; shift 2 ;;
+    *) echo "Unknown flag: $1" >&2; exit 1 ;;
+  esac
+done
+
+if [[ -z "$TERMINAL" || -z "$STATUS" ]]; then
+  echo "Usage: agent-emit --terminal <name> --status <WORKING|WAITING_ON_DECISION|IDLE> [--title t] [--prompt p] [--snippet s]" >&2
+  exit 1
+fi
+
+json="{\"terminalId\":\"$TERMINAL\",\"status\":\"$STATUS\""
+[[ -n "$TITLE" ]]   && json+=",\"taskTitle\":\"$TITLE\""
+[[ -n "$PROMPT" ]]  && json+=",\"decisionPrompt\":\"$PROMPT\""
+[[ -n "$SNIPPET" ]] && json+=",\"lastMessageSnippet\":\"$SNIPPET\""
+json+="}"
+
+curl -s -X POST http://127.0.0.1:4545/api/status \
+  -H "Content-Type: application/json" \
+  -d "$json"

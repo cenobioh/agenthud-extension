@@ -1,0 +1,70 @@
+body {
+  font-family: var(--vscode-font-family);
+  color: var(--vscode-foreground);
+  padding: 8px;
+}
+
+.card {
+  position: relative;
+  border-left: 4px solid gray;
+  background: var(--vscode-editorWidget-background, rgba(255, 255, 255, 0.04));
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.status-working-seen { border-left-color: #22d3ee; }
+.status-working-unseen { border-left-color: #eab308; }
+.status-decision { border-left-color: #ef4444; }
+.status-idle-unseen { border-left-color: #f97316; }
+.status-idle-seen { border-left-color: #6b7280; }
+
+.title-row {
+  margin-bottom: 4px;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.title-input {
+  width: 100%;
+  box-sizing: border-box;
+  font-weight: 600;
+  font-family: inherit;
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border: 1px solid var(--vscode-focusBorder);
+  border-radius: 2px;
+  padding: 1px 3px;
+}
+
+.badge {
+  font-size: 0.85em;
+  opacity: 0.85;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.prompt {
+  margin-top: 6px;
+  font-style: italic;
+  font-size: 0.9em;
+}
+
+.snippet {
+  margin-top: 6px;
+  font-size: 0.9em;
+  opacity: 0.85;
+}
+
+.unseen-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f97316;
+}
