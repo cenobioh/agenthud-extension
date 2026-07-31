@@ -6,28 +6,82 @@
     vscode.postMessage({ command: 'newSession' });
   });
 
-  document.getElementById('link-terminal').addEventListener('click', () => {
-    vscode.postMessage({ command: 'linkTerminal' });
-  });
+  let latestSessions = [];
+  let stuckThresholdMinutes = 10;
 
   window.addEventListener('message', (event) => {
     if (event.data.command === 'updateState') {
-      render(event.data.sessions);
+      latestSessions = event.data.sessions;
+      if (typeof event.data.stuckThresholdMinutes === 'number') {
+        stuckThresholdMinutes = event.data.stuckThresholdMinutes;
+      }
+      render(latestSessions);
     }
   });
+
+  // Periodically refresh elapsed-time labels even when no new state arrives.
+  setInterval(() => {
+    if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
+    render(latestSessions);
+  }, 30000);
+
+  function timeAgo(timestamp) {
+    const seconds = Math.floor((Date.now() - timestamp) / 1000);
+    if (seconds < 60) return 'just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    return `${hours}h ago`;
+  }
+
+  function isStuck(session) {
+    if (session.status !== 'WORKING') return false;
+    return Date.now() - session.lastUpdated > stuckThresholdMinutes * 60000;
+  }
 
   function statusClass(session) {
     if (session.status === 'WAITING_ON_DECISION') return 'status-decision';
     if (session.status === 'WORKING') {
+      if (isStuck(session)) return 'status-working-stuck';
       return session.lastMessageSeen ? 'status-working-seen' : 'status-working-unseen';
     }
     return session.lastMessageSeen ? 'status-idle-seen' : 'status-idle-unseen';
   }
 
+  function parentDir(p) {
+    if (!p) return null;
+    const normalized = p.replace(/[\\/]+$/, '');
+    const idx = Math.max(normalized.lastIndexOf('/'), normalized.lastIndexOf('\\'));
+    return idx >= 0 ? normalized.slice(0, idx) : null;
+  }
+
+  function baseName(p) {
+    const normalized = p.replace(/[\\/]+$/, '');
+    const idx = Math.max(normalized.lastIndexOf('/'), normalized.lastIndexOf('\\'));
+    return idx >= 0 ? normalized.slice(idx + 1) : normalized;
+  }
+
   function render(sessions) {
     container.innerHTML = '';
+
+    const groups = new Map();
     for (const session of sessions) {
-      container.appendChild(renderCard(session));
+      const key = parentDir(session.sessionDir) || '';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(session);
+    }
+
+    if (groups.size <= 1) {
+      for (const session of sessions) container.appendChild(renderCard(session));
+      return;
+    }
+
+    for (const [key, group] of groups) {
+      const header = document.createElement('div');
+      header.className = 'group-header';
+      header.textContent = key ? baseName(key) : 'Other';
+      container.appendChild(header);
+      for (const session of group) container.appendChild(renderCard(session));
     }
   }
 
@@ -41,11 +95,37 @@
     const titleRow = document.createElement('div');
     titleRow.className = 'title-row';
     titleRow.appendChild(renderTitle(session));
+
+    if (session.status === 'IDLE') {
+      const restartBtn = document.createElement('button');
+      restartBtn.className = 'restart-btn';
+      restartBtn.textContent = '↻';
+      restartBtn.title = 'Restart claude in this terminal';
+      restartBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        vscode.postMessage({ command: 'restartSession', terminalId: session.terminalId });
+      });
+      titleRow.appendChild(restartBtn);
+    }
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'close-btn';
+    closeBtn.textContent = '×';
+    closeBtn.title = 'Close session';
+    closeBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      vscode.postMessage({ command: 'closeSession', terminalId: session.terminalId });
+    });
+    titleRow.appendChild(closeBtn);
+
     card.appendChild(titleRow);
 
     const badge = document.createElement('div');
     badge.className = 'badge';
-    badge.textContent = session.status + (session.status === 'WAITING_ON_DECISION' ? ' — Action Required' : '');
+    let badgeText = session.status;
+    if (session.status === 'WAITING_ON_DECISION') badgeText += ' — Action Required';
+    if (isStuck(session)) badgeText += ' — possibly stuck?';
+    badge.textContent = badgeText;
     card.appendChild(badge);
 
     if (session.decisionPrompt) {
@@ -67,6 +147,11 @@
       dot.className = 'unseen-dot';
       card.appendChild(dot);
     }
+
+    const time = document.createElement('div');
+    time.className = 'time-ago';
+    time.textContent = timeAgo(session.lastUpdated);
+    card.appendChild(time);
 
     return card;
   }

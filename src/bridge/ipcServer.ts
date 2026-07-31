@@ -1,13 +1,14 @@
 import * as http from 'http';
 import { SessionStore } from '../state/SessionStore';
 
-const PORT = 4545;
+const DEFAULT_PORT = 4545;
 const HOST = '127.0.0.1';
 
 export function startIpcServer(
   store: SessionStore,
   getActiveTerminalName: () => string | undefined,
-  onLog: (msg: string) => void
+  onLog: (msg: string) => void,
+  port: number = DEFAULT_PORT
 ): http.Server {
   const server = http.createServer((req, res) => {
     if (req.method !== 'POST' || req.url !== '/api/status') {
@@ -45,13 +46,15 @@ export function startIpcServer(
 
   server.on('error', (err: NodeJS.ErrnoException) => {
     if (err.code === 'EADDRINUSE') {
-      onLog(`AgentHUD: port ${PORT} already in use — IPC server not started. Another AgentHUD instance may be running.`);
+      onLog(
+        `AgentHUD: port ${port} already in use — IPC server not started. Another AgentHUD instance may be running, or set a different "agenthud.port".`
+      );
     } else {
       onLog(`AgentHUD IPC server error: ${err.message}`);
     }
     // Do not throw/rethrow — the extension must stay usable even if the IPC server fails to bind.
   });
 
-  server.listen(PORT, HOST);
+  server.listen(port, HOST);
   return server;
 }

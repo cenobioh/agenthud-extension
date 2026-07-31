@@ -2,7 +2,7 @@
   "name": "agenthud",
   "displayName": "AgentHUD",
   "description": "Status HUD and focus router for AI agents running in native terminal tabs",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "publisher": "cenobioh",
   "license": "MIT",
   "icon": "media/icon.png",
@@ -45,7 +45,33 @@
           "type": "webview"
         }
       ]
-    }
+    },
+    "configuration": {
+      "title": "AgentHUD",
+      "properties": {
+        "agenthud.defaultSessionsDirectory": {
+          "type": "string",
+          "default": "",
+          "description": "Default parent directory suggested when starting a new AgentHUD session. Leave empty to default to your home directory."
+        },
+        "agenthud.port": {
+          "type": "number",
+          "default": 4545,
+          "description": "Port the local IPC server binds to on 127.0.0.1. Change this if 4545 conflicts with another AgentHUD instance (e.g. a second window/profile)."
+        },
+        "agenthud.stuckThresholdMinutes": {
+          "type": "number",
+          "default": 10,
+          "description": "Flag a WORKING session as possibly stuck if it hasn't reported a status update in this many minutes."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "agenthud.focusNextDecision",
+        "title": "AgentHUD: Focus Next Decision"
+      }
+    ]
   },
   "scripts": {
     "compile": "tsc -p ./",

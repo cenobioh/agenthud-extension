@@ -29,6 +29,8 @@ json="{\"terminalId\":\"$TERMINAL\",\"status\":\"$STATUS\""
 [[ -n "$SNIPPET" ]] && json+=",\"lastMessageSnippet\":\"$SNIPPET\""
 json+="}"
 
-curl -s -X POST http://127.0.0.1:4545/api/status \
+PORT="${AGENTHUD_PORT:-4545}"
+
+curl -s -X POST "http://127.0.0.1:${PORT}/api/status" \
   -H "Content-Type: application/json" \
   -d "$json"

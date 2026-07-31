@@ -19,17 +19,21 @@ const HOOK_EVENTS: { event: string; matcher: string }[] = [
 ];
 
 /**
- * Ensures the current workspace's .claude/settings.json wires PreToolUse/Stop/
- * Notification hooks to this extension's bundled claude-agenthud-hook script.
- * Merges into existing settings/hooks rather than overwriting them, and is a
- * no-op if there's no open workspace folder or the existing file is malformed.
+ * Ensures targetDir's .claude/settings.json wires PreToolUse/Stop/Notification
+ * hooks to this extension's bundled claude-agenthud-hook script. Merges into
+ * existing settings/hooks rather than overwriting them, and is a no-op if the
+ * existing file is malformed.
  */
-export function ensureHookWiring(context: vscode.ExtensionContext): void {
-  const folder = vscode.workspace.workspaceFolders?.[0];
-  if (!folder) return;
-
-  const hookScript = path.join(context.extensionPath, 'bin', 'claude-agenthud-hook');
-  const settingsDir = path.join(folder.uri.fsPath, '.claude');
+export function ensureHookWiring(context: vscode.ExtensionContext, targetDir: string): void {
+  const hookCommand =
+    process.platform === 'win32'
+      ? `powershell -NoProfile -ExecutionPolicy Bypass -File "${path.join(
+          context.extensionPath,
+          'bin',
+          'claude-agenthud-hook.ps1'
+        )}"`
+      : path.join(context.extensionPath, 'bin', 'claude-agenthud-hook');
+  const settingsDir = path.join(targetDir, '.claude');
   const settingsPath = path.join(settingsDir, 'settings.json');
 
   let config: ClaudeSettings = {};
@@ -48,9 +52,9 @@ export function ensureHookWiring(context: vscode.ExtensionContext): void {
   let changed = !fs.existsSync(settingsPath);
   for (const { event, matcher } of HOOK_EVENTS) {
     const entries = (config.hooks[event] = config.hooks[event] || []);
-    const alreadyWired = entries.some((entry) => entry.hooks?.some((h) => h.command === hookScript));
+    const alreadyWired = entries.some((entry) => entry.hooks?.some((h) => h.command === hookCommand));
     if (!alreadyWired) {
-      entries.push({ matcher, hooks: [{ type: 'command', command: hookScript }] });
+      entries.push({ matcher, hooks: [{ type: 'command', command: hookCommand }] });
       changed = true;
     }
   }
