@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(outputChannel);
 
   const store = new SessionStore();
-  const provider = new SidebarProvider(context.extensionUri, store);
+  const provider = new SidebarProvider(context, store);
 
   context.subscriptions.push(vscode.window.registerWebviewViewProvider('agenthud.sidebar', provider));
 

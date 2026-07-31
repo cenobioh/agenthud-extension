@@ -4,10 +4,15 @@ body {
   padding: 8px;
 }
 
-#new-session {
-  width: 100%;
-  padding: 6px 10px;
+.toolbar {
+  display: flex;
+  gap: 6px;
   margin-bottom: 10px;
+}
+
+.toolbar button {
+  flex: 1;
+  padding: 6px 10px;
   background: var(--vscode-button-background);
   color: var(--vscode-button-foreground);
   border: none;
@@ -16,8 +21,17 @@ body {
   font-family: inherit;
 }
 
-#new-session:hover {
+.toolbar button:hover {
   background: var(--vscode-button-hoverBackground);
+}
+
+#link-terminal {
+  background: var(--vscode-button-secondaryBackground, var(--vscode-button-background));
+  color: var(--vscode-button-secondaryForeground, var(--vscode-button-foreground));
+}
+
+#link-terminal:hover {
+  background: var(--vscode-button-secondaryHoverBackground, var(--vscode-button-hoverBackground));
 }
 
 .card {

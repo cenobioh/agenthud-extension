@@ -28,7 +28,7 @@ Clicking a card in the HUD focuses that terminal. Clicking a card's title lets y
 
 ## Wiring up a real Claude Code session
 
-This repo ships a Claude Code hook bridge (`bin/claude-agenthud-hook`) and a project-scoped `.claude/settings.json` that maps hook events to AgentHUD statuses:
+AgentHUD ships a Claude Code hook bridge (`bin/claude-agenthud-hook`) that maps hook events to statuses:
 
 | Hook event | AgentHUD status |
 |---|---|
@@ -36,19 +36,16 @@ This repo ships a Claude Code hook bridge (`bin/claude-agenthud-hook`) and a pro
 | `Stop` | `IDLE` |
 | `Notification` (`permission_prompt`) | `WAITING_ON_DECISION` |
 
-To test it, in a terminal inside the Extension Development Host:
+**Automatic wiring** — two sidebar buttons handle setup for you (both write/merge the `.claude/settings.json` hooks into the current workspace, pointing at the extension's bundled hook script):
 
-```bash
-cd agenthud-extension   # project root, so the .claude/settings.json hooks apply
-# rename this terminal tab to match AGENTHUD_TERMINAL below
-export AGENTHUD_TERMINAL=claude-1
-export AGENTHUD_TITLE="Claude session"
-claude
-```
+- **+ New Session** — opens a fresh terminal with `AGENTHUD_TERMINAL`/`AGENTHUD_TITLE` already set and runs `claude chat`. Works immediately, no manual steps.
+- **Link Terminal** — pick an already-open terminal from a quick-pick list; AgentHUD exports the env vars directly into it. If `claude` is already running there, exit and restart it (`Ctrl+D` then `claude`) so it picks up the new environment.
 
-Run `/hooks` inside that session to confirm `PreToolUse`/`Stop`/`Notification` point at `claude-agenthud-hook`, then give it a prompt that triggers a tool call and watch the HUD update.
+Run `/hooks` inside a session to confirm `PreToolUse`/`Stop`/`Notification` point at `claude-agenthud-hook`, then give it a prompt that triggers a tool call and watch the HUD update.
 
 Note: if launched from within another Claude Code session, you'll need to `unset CLAUDECODE` first (nested-session guard).
+
+**Manual wiring** (if you'd rather not auto-write `.claude/settings.json`): copy the hooks block from this repo's `.claude/settings.json` into your project, pointing `command` at your installed extension's `bin/claude-agenthud-hook`, then set `AGENTHUD_TERMINAL`/`AGENTHUD_TITLE` yourself before running `claude`.
 
 ## IPC API
 

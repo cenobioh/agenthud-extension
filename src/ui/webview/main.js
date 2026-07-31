@@ -6,6 +6,10 @@
     vscode.postMessage({ command: 'newSession' });
   });
 
+  document.getElementById('link-terminal').addEventListener('click', () => {
+    vscode.postMessage({ command: 'linkTerminal' });
+  });
+
   window.addEventListener('message', (event) => {
     if (event.data.command === 'updateState') {
       render(event.data.sessions);

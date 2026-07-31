@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.3
+
+- "New Session" button now auto-wires the workspace's `.claude/settings.json`
+  hooks and starts the terminal with `AGENTHUD_TERMINAL`/`AGENTHUD_TITLE` set,
+  so no manual hook setup is needed.
+- Add "Link Terminal" button to associate an already-open terminal with
+  AgentHUD (exports the env vars into it directly; requires restarting an
+  already-running `claude` session in that terminal).
+
 ## 0.0.2
 
 - Add marketplace icon.
