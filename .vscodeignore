@@ -2,6 +2,7 @@ src/**
 !src/ui/webview/**
 tsconfig.json
 .gitignore
+.env
 .vscode/**
 .vscode-test/**
 **/*.map
