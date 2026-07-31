@@ -2,9 +2,10 @@
   "name": "agenthud",
   "displayName": "AgentHUD",
   "description": "Status HUD and focus router for AI agents running in native terminal tabs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "cenobioh",
   "license": "MIT",
+  "icon": "media/icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/cenobioh/agenthud-extension.git"

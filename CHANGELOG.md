@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.2
+
+- Add marketplace icon.
+- Add "New Session" button to sidebar HUD.
+
 ## 0.0.1
 
 Initial release.
