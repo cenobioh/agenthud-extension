@@ -26,6 +26,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         }
       } else if (message.command === 'renameTask') {
         this.store.rename(message.terminalId, message.title);
+      } else if (message.command === 'newSession') {
+        const terminal = vscode.window.createTerminal('claude chat');
+        terminal.show();
+        terminal.sendText('claude chat');
       }
     });
 
@@ -54,6 +58,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   <link rel="stylesheet" href="${styleUri}">
 </head>
 <body>
+  <button id="new-session">+ New Session</button>
   <div id="sessions"></div>
   <script nonce="${nonce}" src="${scriptUri}"></script>
 </body>

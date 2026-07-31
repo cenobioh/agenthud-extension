@@ -2,6 +2,10 @@
   const vscode = acquireVsCodeApi();
   const container = document.getElementById('sessions');
 
+  document.getElementById('new-session').addEventListener('click', () => {
+    vscode.postMessage({ command: 'newSession' });
+  });
+
   window.addEventListener('message', (event) => {
     if (event.data.command === 'updateState') {
       render(event.data.sessions);
