@@ -123,9 +123,7 @@ body {
 }
 
 .unseen-dot {
-  position: absolute;
-  top: 12px;
-  left: 4px;
+  flex-shrink: 0;
   width: 8px;
   height: 8px;
   border-radius: 50%;

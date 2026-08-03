@@ -26,7 +26,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     webviewView.webview.html = this.getHtml(webviewView.webview);
 
     webviewView.webview.onDidReceiveMessage((message) => {
-      if (message.command === 'focusTerminal') {
+      if (message.command === 'ready') {
+        this.postState(this.store.getAll());
+      } else if (message.command === 'focusTerminal') {
         const terminal = vscode.window.terminals.find((t) => t.name === message.terminalId);
         if (terminal) {
           terminal.show(false);
@@ -40,6 +42,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         this.closeSession(message.terminalId);
       } else if (message.command === 'restartSession') {
         this.restartSession(message.terminalId);
+      }
+    });
+
+    webviewView.onDidChangeVisibility(() => {
+      if (webviewView.visible) {
+        this.postState(this.store.getAll());
       }
     });
 

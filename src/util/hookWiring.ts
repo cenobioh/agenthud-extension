@@ -13,6 +13,7 @@ interface ClaudeSettings {
 }
 
 const HOOK_EVENTS: { event: string; matcher: string }[] = [
+  { event: 'UserPromptSubmit', matcher: '' },
   { event: 'PreToolUse', matcher: '' },
   { event: 'Stop', matcher: '' },
   { event: 'Notification', matcher: 'permission_prompt' },

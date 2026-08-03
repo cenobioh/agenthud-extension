@@ -9,6 +9,8 @@
   let latestSessions = [];
   let stuckThresholdMinutes = 10;
 
+  vscode.postMessage({ command: 'ready' });
+
   window.addEventListener('message', (event) => {
     if (event.data.command === 'updateState') {
       latestSessions = event.data.sessions;
@@ -94,6 +96,11 @@
 
     const titleRow = document.createElement('div');
     titleRow.className = 'title-row';
+    if (!session.lastMessageSeen) {
+      const dot = document.createElement('span');
+      dot.className = 'unseen-dot';
+      titleRow.appendChild(dot);
+    }
     titleRow.appendChild(renderTitle(session));
 
     if (session.status === 'IDLE') {
@@ -140,12 +147,6 @@
       snippet.className = 'snippet';
       snippet.textContent = session.lastMessageSnippet;
       card.appendChild(snippet);
-    }
-
-    if (!session.lastMessageSeen) {
-      const dot = document.createElement('span');
-      dot.className = 'unseen-dot';
-      card.appendChild(dot);
     }
 
     const time = document.createElement('div');

@@ -21,7 +21,11 @@ export function activate(context: vscode.ExtensionContext): void {
   store.restore(saved, liveTerminalIds);
 
   const provider = new SidebarProvider(context, store);
-  context.subscriptions.push(vscode.window.registerWebviewViewProvider('agenthud.sidebar', provider));
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider('agenthud.sidebar', provider, {
+      webviewOptions: { retainContextWhenHidden: true },
+    })
+  );
 
   context.subscriptions.push(store.onDidChange((sessions) => context.globalState.update(SESSIONS_STORAGE_KEY, sessions)));
 
